@@ -105,12 +105,12 @@ Rules are active only when three matching text blocks are aligned horizontally (
 ```mermaid
 graph LR
     subgraph Property Assignment
-    A["![T_BABA](../src/images/texts/blocks/T_BABA.gif)"] -->|IS| B["![YOU](../src/images/texts/properties/YOU.gif)"]
+    A[T_BABA Text Block] -->|IS| B(YOU Text Block)
     C[Result: You can now control the physical Baba character]
     end
 
     subgraph Transformation Rule
-    D["![T_ROCK](../src/images/texts/blocks/T_ROCK.gif)"] -->|IS| E["![T_BABA](../src/images/texts/blocks/T_BABA.gif)"]
+    D[T_ROCK Text Block] -->|IS| E(T_BABA Text Block)
     F[Result: All physical rocks instantly turn into Babas]
     end
 ```
