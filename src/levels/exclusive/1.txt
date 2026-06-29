@@ -1,0 +1,31 @@
+rows
+10
+
+columns
+20
+
+blocks
+wall: [10 1 7 1 7 3 10 3]
+flag: {4 13}
+glue: [2 11 2 15 6 15 6 11 3 11]
+baba: {4 2}
+
+words
+t_flag: 8 2
+is: 9 2
+push: 10 2
+
+t_flag: 1 1
+is: 1 2
+win: 1 3
+
+t_glue: 1 18
+is: 1 19
+stick: 1 20
+
+t_baba: 3 17
+is: 4 17
+you: 5 17
+
+t_wall: 4 16
+stop: 4 18
