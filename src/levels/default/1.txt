@@ -1,0 +1,19 @@
+rows
+16
+
+columns
+28
+
+blocks
+baba: {12 17  11 16}
+glue: {14 17}
+rock: {5 5}
+
+words
+t_baba: 11 9
+t_glue: 1 1
+t_rock: 2 2
+push: 2 4 
+stick: 1 3
+you: 13 9
+is: 12 9  1 2  2 3
