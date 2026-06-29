@@ -30,7 +30,7 @@ Welcome to the player and creator manual for *Baba Is You*. This guide will expl
 ## 1. Introduction
 
 ### Game Concept
-*Baba Is You* is a puzzle game where the rules you must follow are present as blocks you can interact with. By pushing and aligning these blocks, you can alter how the level itself operates. Turn yourself into a rock, make walls pushable, float over water, or change the victory condition entirely. If a rule can be formed in the grid, it becomes law.
+*Baba Is You* is a puzzle game where the rules you must follow are present as physical blocks you can interact with. By pushing and aligning these blocks, you can alter how the level itself operates. Turn yourself into a rock, make walls pushable, float over water, or change the victory condition entirely. If a rule can be formed in the grid, it becomes law.
 
 ### System Requirements
 * **Operating System:** Windows 10/11, macOS (10.15+), or Linux distributions.
@@ -105,13 +105,13 @@ Rules are active only when three matching text blocks are aligned horizontally (
 ```mermaid
 graph LR
     subgraph Property Assignment
-    A[BABA Text Block] -->|IS| B(YOU Text Block)
-    C[Result: You can now control the Baba character]
+    A[T_BABA Text Block] -->|IS| B(YOU Text Block)
+    C[Result: You can now control the physical Baba character]
     end
 
     subgraph Transformation Rule
-    D[ROCK Text Block] -->|IS| E(BABA Text Block)
-    F[Result: All rocks physically turn into Babas]
+    D[T_ROCK Text Block] -->|IS| E(T_BABA Text Block)
+    F[Result: All physical rocks instantly turn into Babas]
     end
 ```
 
@@ -123,47 +123,45 @@ graph LR
 ### Word Categories
 
 There are three categories of text blocks in the game:
-1. **Noun Words:** Identify the target block type. (Represented in text as `T_BABA`, `T_FLAG`, `T_FLOWER`, `T_LAVA`, `T_ROCK`, `T_SKULL`, `T_TILE`, `T_WALL`, `T_WATER`, `T_GLUE`).
-2. **Operator Words:** Connects nouns to behaviors or other nouns. (Represented as `IS`).
-3. **Property Words:** Assigns physical traits or behaviors to the target blocks. (Represented as `YOU`, `WIN`, `STOP`, `PUSH`, `SINK`, `DEFEAT`, `MELT`, `HOT`, `STICK`).
+
+1. **Noun Words:** Identify the target block type.
+   * ![T_BABA](../src/images/texts/blocks/T_BABA.gif) (`T_BABA`) refers to ![BABA](../src/images/blocks/BABA.gif)
+   * ![T_FLAG](../src/images/texts/blocks/T_FLAG.gif) (`T_FLAG`) refers to ![FLAG](../src/images/blocks/FLAG.gif)
+   * ![T_ROCK](../src/images/texts/blocks/T_ROCK.gif) (`T_ROCK`) refers to ![ROCK](../src/images/blocks/ROCK.gif)
+   * ![T_WALL](../src/images/texts/blocks/T_WALL.gif) (`T_WALL`) refers to ![WALL](../src/images/blocks/WALL.gif)
+
+2. **Operator Words:** Connects nouns to behaviors or other nouns.
+   * ![IS](../src/images/texts/operators/IS.gif) (`IS`)
+
+3. **Property Words:** Assigns physical traits or behaviors to the target blocks. (e.g., ![YOU](../src/images/texts/properties/YOU.gif) or ![WIN](../src/images/texts/properties/WIN.gif)).
 
 ---
 
 ### Property Behaviors Matrix
 
-| Property | Behavior Description |
-| :--- | :--- |
-| **`YOU`** | Designates the object you control. Pressing direction keys translates all active instances of this object. |
-| **`WIN`** | Designates the victory target. If a `YOU` item occupies the same cell as a `WIN` item, you win and progress. |
-| **`STOP`** | Prevents movement. Items cannot pass through or enter a cell occupied by a `STOP` item. |
-| **`PUSH`** | Allows you to push the item. When walked into, the block shifts forward in the direction of movement. |
-| **`SINK`** | Destroys items sharing the tile. If any item walks onto a `SINK` block, both items are deleted. |
-| **`DEFEAT`** | Deadly block. If a controllable `YOU` item touches a `DEFEAT` block, the `YOU` item is destroyed. |
-| **`HOT`** | Emits intense heat. Destroy any `MELT` items occupying the same tile. |
-| **`MELT`** | Vulnerable to heat. Instantly destroyed if sharing a tile with a `HOT` item. |
-| **`STICK`** | Sticky behavior. Locks movement transitions. (See details below). |
+| Property Block | Behavior Description |
+| :---: | :--- |
+| ![YOU](../src/images/texts/properties/YOU.gif) | Designates the object you control. Pressing direction keys translates all active instances of this object. |
+| ![WIN](../src/images/texts/properties/WIN.gif) | Designates the victory target. If a `YOU` item occupies the same cell as a `WIN` item, you win and progress. |
+| ![STOP](../src/images/texts/properties/STOP.gif) | Prevents movement. Items cannot pass through or enter a cell occupied by a `STOP` item. |
+| ![PUSH](../src/images/texts/properties/PUSH.gif) | Allows you to push the item. When walked into, the block shifts forward in the direction of movement. |
+| ![SINK](../src/images/texts/properties/SINK.gif) | Destroys items sharing the tile. If any item walks onto a `SINK` block, both items are deleted. |
+| ![DEFEAT](../src/images/texts/properties/DEFEAT.gif) | Deadly block. If a controllable `YOU` item touches a `DEFEAT` block, the `YOU` item is destroyed. |
+| ![HOT](../src/images/texts/properties/HOT.gif) | Emits intense heat. Destroy any `MELT` items occupying the same tile. |
+| ![MELT](../src/images/texts/properties/MELT.gif) | Vulnerable to heat. Instantly destroyed if sharing a tile with a `HOT` item. |
+| ![STICK](../src/images/texts/properties/STICK.gif) | Sticky behavior. Locks movement transitions. (See details below). |
 
 ---
 
 ### Special Glue & Stick Mechanics
-* **`GLUE` Noun:** Represents physical slime patches.
-* **`STICK` Property:** When a rule is formed (e.g. `GLUE IS STICK`), any item that steps onto a `GLUE` cell gets stuck.
-* **Movement Constraint:** Once your controlled character (`YOU`) steps onto a cell containing a `STICK` item, all direction moves in any direction are blocked. You must press **Spacebar** to undo your movement and free yourself.
+* **`GLUE` Noun:** Represents physical slime patches (![GLUE](../src/images/blocks/GLUE.gif)).
+* **`STICK` Property:** When a rule is formed (e.g. ![T_GLUE](../src/images/texts/blocks/T_GLUE.gif) ![IS](../src/images/texts/operators/IS.gif) ![STICK](../src/images/texts/properties/STICK.gif)), any item that steps onto a `GLUE` cell gets stuck.
+* **Movement Constraint:** Once your controlled character steps onto a cell containing a `STICK` item, all direction moves in any direction are blocked. You must press **Spacebar** to undo your movement and free yourself.
 
 ---
 
 ### Undo and Rewind Mechanics
-If you make a mistake, push a block against a wall, or get your character destroyed, you do not need to restart the level. Pressing the **Spacebar** reverts the layout state, block properties, and position coordinates back to the previous turn. You can undo actions all the way back to the start of the level.
-
-```mermaid
-graph TD
-    A(Player makes a move) --> B[Game records state 'Atomic Move']
-    B --> C[State pushed to Undo History Stack]
-    C --> D{Player presses Spacebar?}
-    D -- Yes --> E[Pop last state from Stack]
-    E --> F[Restore previous positions and blocks]
-    D -- No --> G[Continue game]
-```
+If you make a mistake, push a block against a wall, or get your character destroyed, you do not need to restart the level. Pressing the **Spacebar** reverts the game back to the previous turn. You can hold or press spacebar repeatedly to undo actions all the way back to the start of the level. The game remembers everything you did perfectly!
 
 ---
 
