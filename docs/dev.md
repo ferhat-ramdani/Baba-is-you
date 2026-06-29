@@ -12,12 +12,10 @@ This document serves as the technical reference manual for engineers, systems de
    - [Repository Layout](#repository-layout)
 2. [Environment Setup & Build System](#2-environment-setup--build-system)
    - [System Prerequisites](#system-prerequisites)
-   - [IDE Integration](#ide-integration)
    - [Compilation and Packaging via Apache Ant](#compilation-and-packaging-via-apache-ant)
 3. [Architecture & Core Subsystems](#3-architecture--core-subsystems)
    - [Architectural Pattern](#architectural-pattern)
    - [Detailed Package Breakdown](#detailed-package-breakdown)
-   - [Data Structures & Semantics](#data-structures--semantics)
 4. [Core Execution & Processing Logic](#4-core-execution--processing-logic)
    - [Rule Parsing & Evaluation Phase](#rule-parsing--evaluation-phase)
    - [Recursive Movement & Collision System](#recursive-movement--collision-system)
@@ -76,15 +74,9 @@ To build and run the project, the system must have:
 * **Java Development Kit (JDK):** JDK 21 or higher. Ensure that the `JAVA_HOME` environment variable points to your JDK directory and that the `java` and `javac` commands are available in your system path.
 * **Apache Ant:** Command-line build tool. Ensure that the `ant` executable is available in your system path.
 
-### IDE Integration
-
-1. Select **File > Open** and choose the root directory of the cloned repository.
-2. Verify the Project SDK is set to a JDK version of 21 or higher.
-3. Ensure that `lib/zen-6.0.jar` is configured as a compile-time dependency in your project library settings.
-
 ### Compilation and Packaging via Apache Ant
 
-The project uses Apache Ant to automate building, packaging, and documenting. The configuration is defined in [build.xml](build.xml).
+The project uses Apache Ant to automate building, packaging, and documenting. The configuration is defined in [build.xml](../build.xml).
 
 #### Key Build Targets
 To run these targets, execute the commands from the repository root:
@@ -93,7 +85,7 @@ To run these targets, execute the commands from the repository root:
   ```cmd
   ant compile
   ```
-  Compiles all source files in `src/` and outputs the resulting bytecode `.class` files into a temporary `classes/` directory.
+  Compiles all source files in `src/` and outputs the resulting bytecode `.class` files into a transient `classes/` directory.
 
 * **Build Runnable JAR:**
   ```cmd
@@ -101,11 +93,17 @@ To run these targets, execute the commands from the repository root:
   ```
   Compiles the codebase and packages it into `baba.jar` in the root directory. The JAR file's manifest is configured to reference `baba.engine.Main` as the entry point and includes `lib/zen-6.0.jar` in its classpath.
 
+* **Generate API Documentation:**
+  ```cmd
+  ant javadoc
+  ```
+  Generates standard HTML Javadoc files for all source classes and places them in `docs/doc/`.
+
 * **Clean Workspace:**
   ```cmd
   ant clean
   ```
-  Deletes the generated directories and the compiled `baba.jar` file.
+  Deletes all generated class and jar files.
 
 ---
 
@@ -114,9 +112,9 @@ To run these targets, execute the commands from the repository root:
 ### Architectural Pattern
 
 The application utilizes a variation of the Model-View-Controller (MVC) pattern:
-1. **Model (State Representation):** Managed by the `baba.grid` package (specifically [Grid.java](src/baba/grid/Grid.java) and [Item.java](src/baba/grid/Item.java)). It holds the state of the active board, where items are located, and the current active rules.
-2. **View (Rendering Subsystem):** Managed by [View.java](src/baba/view/View.java), which handles coordinates-to-pixels translation, scales graphics according to window constraints, and paints sprites using standard Java 2D Graphics APIs.
-3. **Controller (Application & Input Loop):** Managed by [Controller.java](src/baba/engine/Controller.java), which initializes the Zen graphic frame, catches user keyboard inputs, sequences logic ticks (evaluating rules, checking collisions, triggering victory conditions), and requests frame redraws.
+1. **Model (State Representation):** Managed by the `baba.grid` package (specifically [Grid.java](../src/baba/grid/Grid.java) and [Item.java](../src/baba/grid/Item.java)). It holds the state of the active board, where items are located, and the current active rules.
+2. **View (Rendering Subsystem):** Managed by [View.java](../src/baba/view/View.java), which handles coordinates-to-pixels translation, scales graphics according to window constraints, and paints sprites using standard Java 2D Graphics APIs.
+3. **Controller (Application & Input Loop):** Managed by [Controller.java](../src/baba/engine/Controller.java), which initializes the Zen graphic frame, catches user keyboard inputs, sequences logic ticks (evaluating rules, checking collisions, triggering victory conditions), and requests frame redraws.
 
 ---
 
@@ -124,47 +122,44 @@ The application utilizes a variation of the Model-View-Controller (MVC) pattern:
 
 #### Package: `baba.config`
 Handles initial program execution command arguments, loading configuration parameters, parsing level definitions, and instantiating game items.
-* **[CommandParser.java](src/baba/config/CommandParser.java):** Parses CLI flags (`--levels`, `--level`, and `--execute`). It processes pre-executed starting rules (e.g. `t_baba is you`) and translates them into semantic records.
-* **[Config.java](src/baba/config/Config.java):** A record representing the immutable configuration of the window width, height, target level path, grid boundaries (rows and columns), background color, and CLI-specified starting rules.
-* **[Factory.java](src/baba/config/Factory.java):** Contains helper factory methods to instantiate game items. In particular, it contains the `putAndLink` method, which is used to draw contiguous lines of blocks (like walls) using sequential start and end coordinates.
-* **[Flags.java](src/baba/config/Flags.java):** Defines execution flags (`levels`, `level`, `execute`) as a Java enum.
-* **[GameSetter.java](src/baba/config/GameSetter.java):** Coordinates level progression, transitions to subsequent level index files, and acts as a global configurations manager during execution setup.
-* **[LevelParser.java](src/baba/config/LevelParser.java):** Reads text-based level files, extracts parameters, and loads tiles.
-* **[Modes.java](src/baba/config/Modes.java):** Enum reflecting parsing sections in level text files (`ROWS`, `COLUMNS`, `BLOCKS`, `WORDS`).
+* **[CommandParser.java](../src/baba/config/CommandParser.java):** Parses CLI flags (`--levels`, `--level`, and `--execute`). It processes pre-executed starting rules (e.g. `t_baba is you`) and translates them into semantic records.
+* **[Config.java](../src/baba/config/Config.java):** A record representing the immutable configuration of the window width, height, target level path, grid boundaries (rows and columns), background color, and CLI-specified starting rules.
+* **[Factory.java](../src/baba/config/Factory.java):** Contains helper factory methods to instantiate game items. In particular, it contains the `putAndLink` method, which is used to draw contiguous lines of blocks (like walls) using sequential start and end coordinates.
+* **[Flags.java](../src/baba/config/Flags.java):** Defines execution flags (`levels`, `level`, `execute`) as a Java enum.
+* **[GameSetter.java](../src/baba/config/GameSetter.java):** Coordinates level progression, transitions to subsequent level index files, and acts as a global configurations manager during execution setup.
+* **[LevelParser.java](../src/baba/config/LevelParser.java):** Reads text-based level files, extracts parameters, and loads tiles.
+* **[Modes.java](../src/baba/config/Modes.java):** Enum reflecting parsing sections in level text files (`ROWS`, `COLUMNS`, `BLOCKS`, `WORDS`).
 
 #### Package: `baba.engine`
 Responsible for the runtime application execution lifecycle.
-* **[Main.java](src/baba/engine/Main.java):** Entry point of the program. It sets up the config and loops through Controller instances until the user exits or wins all levels.
-* **[Controller.java](src/baba/engine/Controller.java):** Manages the central loop via the Zen framework. Polling is executed at fixed cycles. It catches keyboard events, calls grid transitions, triggers collision phases, and draws the output to the window.
+* **[Main.java](../src/baba/engine/Main.java):** Entry point of the program. It sets up the config and loops through Controller instances until the user exits or wins all levels.
+* **[Controller.java](../src/baba/engine/Controller.java):** Manages the central loop via the Zen framework. Polling is executed at fixed cycles. It catches keyboard events, calls grid transitions, triggers collision phases, and draws the output to the window.
 
 #### Package: `baba.grid`
 Models the physical board components, item properties, physics boundaries, and transaction histories.
-* **[Item.java](src/baba/grid/Item.java):** A sealed interface permitting `Block` and `Word`. It defines common behavior for items: retrieving images, checking positions, and translating in space via direction vectors.
-* **[Tile.java](src/baba/grid/Tile.java):** An immutable representation of a grid cell defined by coordinate indices `(row, column)`. Includes boundary checking and neighbor calculations.
-* **[Block.java](src/baba/grid/Block.java):** Represents a physical non-word entity on the board (e.g. Baba, a flag, grass, water).
-* **[Word.java](src/baba/grid/Word.java):** Represents a text block placed on the board (e.g. `IS`, `YOU`, `BABA`).
-* **[Grid.java](src/baba/grid/Grid.java):** The primary model component. It maintains a mapping of tiles to lists of items, dynamic behavioral maps, active rules, push hierarchies, rule parsing, and movement simulation.
-* **[Behavior.java](src/baba/grid/Behavior.java):** Represents the dynamically assigned physical capabilities of a specific object name (e.g., whether it is pushable, deadly, or controllable).
-* **[Direction.java](src/baba/grid/Direction.java):** Enum specifying vectors (`UP`, `DOWN`, `LEFT`, `RIGHT`).
-* **[AtomicMove.java](src/baba/grid/AtomicMove.java):** Tracks a single unit movement or transform state of a block. Used to reconstruct past frames.
+* **[Item.java](../src/baba/grid/Item.java):** A sealed interface permitting `Block` and `Word`. It defines common behavior for items: retrieving images, checking positions, and translating in space via direction vectors.
+* **[Tile.java](../src/baba/grid/Tile.java):** An immutable representation of a grid cell defined by coordinate indices `(row, column)`. Includes boundary checking and neighbor calculations.
+* **[Block.java](../src/baba/grid/Block.java):** Represents a physical non-word entity on the board (e.g. ![BABA](../src/images/blocks/BABA.gif) Baba, a flag, grass, water).
+* **[Word.java](../src/baba/grid/Word.java):** Represents a text block placed on the board (e.g. ![IS](../src/images/texts/operators/IS.gif), ![YOU](../src/images/texts/properties/YOU.gif), ![T_BABA](../src/images/texts/blocks/T_BABA.gif)).
+* **[Grid.java](../src/baba/grid/Grid.java):** The primary model component. It maintains a mapping of tiles to lists of items, dynamic behavioral maps, active rules, push hierarchies, rule parsing, and movement simulation.
+* **[Behavior.java](../src/baba/grid/Behavior.java):** Represents the dynamically assigned physical capabilities of a specific object name (e.g., whether it is pushable, deadly, or controllable).
+* **[Direction.java](../src/baba/grid/Direction.java):** Enum specifying vectors (`UP`, `DOWN`, `LEFT`, `RIGHT`).
+* **[AtomicMove.java](../src/baba/grid/AtomicMove.java):** Tracks a single unit movement or transform state of a block. Used to reconstruct past frames in the undo stack.
 
 #### Package: `baba.names`
 Represents the semantic symbols parsed from level files and active rule structures.
-* **[SpriteName.java](src/baba/names/SpriteName.java):** Core sealed interface for all text and block words. Permitted sub-interfaces are `BlockName` and `WordName`.
-* **[WordName.java](src/baba/names/WordName.java):** Sealed interface identifying names representing words. Permitted subclasses are `BlockWord`, `OperatorWord`, and `PropertyWord`.
-* **[BlockName.java](src/baba/names/BlockName.java):** Enum mapping block names.
-* **[BlockWord.java](src/baba/names/BlockWord.java):** Enum mapping the noun text blocks (e.g. `T_BABA`, `T_WALL`).
-* **[OperatorWord.java](src/baba/names/OperatorWord.java):** Enum representing operator words, currently containing only `IS`.
-* **[PropertyWord.java](src/baba/names/PropertyWord.java):** Enum representing descriptive characteristics that can be assigned (`YOU`, `WIN`, `STOP`, `PUSH`, `SINK`, `DEFEAT`, `MELT`, `HOT`, `STICK`).
-* **[Rule.java](src/baba/names/Rule.java):** Sealed interface defining standard rule types. Permitted types are `BlockRule`, `PropRule`, and `EmptyRule`.
-* **[BlockRule.java](src/baba/names/BlockRule.java):** A rule defining a block transformation (e.g., `BABA IS ROCK`).
-* **[PropRule.java](src/baba/names/PropRule.java):** A rule assigning a property word (e.g., `BABA IS YOU`).
-* **[EmptyRule.java](src/baba/names/EmptyRule.java):** A fallback rule representing no operations.
+* **[SpriteName.java](../src/baba/names/SpriteName.java):** Core sealed interface for all text and block words. Permitted sub-interfaces are `BlockName` and `WordName`.
+* **[WordName.java](../src/baba/names/WordName.java):** Sealed interface identifying names representing words. Permitted subclasses are `BlockWord`, `OperatorWord`, and `PropertyWord`.
+* **[BlockName.java](../src/baba/names/BlockName.java):** Enum mapping physical block identities.
+* **[BlockWord.java](../src/baba/names/BlockWord.java):** Enum mapping the noun text blocks (e.g. `T_BABA`, `T_WALL`).
+* **[OperatorWord.java](../src/baba/names/OperatorWord.java):** Enum representing operator words, currently containing only `IS`.
+* **[PropertyWord.java](../src/baba/names/PropertyWord.java):** Enum representing descriptive characteristics that can be assigned (`YOU`, `WIN`, `STOP`, `PUSH`, `SINK`, `DEFEAT`, `MELT`, `HOT`, `STICK`).
+* **[Rule.java](../src/baba/names/Rule.java):** Sealed interface defining standard rule types. Permitted types are `BlockRule`, `PropRule`, and `EmptyRule`.
 
 #### Package: `baba.view`
 Manages graphic context drawing.
-* **[ImageLoader.java](src/baba/view/ImageLoader.java):** A helper class that loads files from `src/images/` using AWT `ImageIcon`.
-* **[View.java](src/baba/view/View.java):** Calculates screen scaling dynamically based on target window resolution, clears frames, translates coordinates, and renders items on the screen.
+* **[ImageLoader.java](../src/baba/view/ImageLoader.java):** A helper class that loads files from `src/images/` using AWT `ImageIcon`.
+* **[View.java](../src/baba/view/View.java):** Calculates screen scaling dynamically based on target window resolution, clears frames, translates coordinates, and renders items on the screen.
 
 ---
 
@@ -194,14 +189,14 @@ graph TD
 ```
 
 #### Rule Definitions
-* **Property Assignment Rules:** If the structure matches `[Noun Block] IS [Property Word]`, the property is assigned to the Behavior associated with that noun block (e.g. `ROCK IS PUSH`).
-* **Block Transformation Rules:** If the structure matches `[Noun Block 1] IS [Noun Block 2]`, all existing items belonging to Noun 1 are replaced with items of type Noun 2 at their exact coordinates (e.g. `ROCK IS BABA`).
+* **Property Assignment Rules:** If the structure matches `[Noun Block] IS [Property Word]`, the property is assigned to the Behavior associated with that noun block (e.g. ![T_ROCK](../src/images/texts/blocks/T_ROCK.gif) ![IS](../src/images/texts/operators/IS.gif) ![PUSH](../src/images/texts/properties/PUSH.gif)).
+* **Block Transformation Rules:** If the structure matches `[Noun Block 1] IS [Noun Block 2]`, all existing items belonging to Noun 1 are replaced with items of type Noun 2 at their exact coordinates (e.g. ![T_ROCK](../src/images/texts/blocks/T_ROCK.gif) ![IS](../src/images/texts/operators/IS.gif) ![T_BABA](../src/images/texts/blocks/T_BABA.gif)).
 
 ---
 
 ### Recursive Movement & Collision System
 
-When a player inputs a direction key, the movement solver checks if the translation can proceed. This is executed in `pushRecursively(Tile tile, Direction direction)` within [Grid.java](src/baba/grid/Grid.java):
+When a player inputs a direction key, the movement solver checks if the translation can proceed. This is executed in `pushRecursively(Tile tile, Direction direction)` within [Grid.java](../src/baba/grid/Grid.java):
 
 1. **Evaluate Target Tile:** Inspect all items situated on the target coordinate.
 2. **Examine Constraints:**
