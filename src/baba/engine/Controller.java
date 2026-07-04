@@ -14,32 +14,21 @@ import baba.grid.Grid;
 import baba.names.PropertyWord;
 import baba.view.View;
 
-/**
- * Controller class manages the game logic and user input handling.
- */
 public class Controller {
     private final Config config;
     private final Grid grid;
     private boolean playing = true;
     private boolean win = false;
+    private boolean returnToMenu = false;
 
-    /**
-     * Constructs a Controller with the specified grid and config.
-     *
-     * @param grid   the game grid
-     * @param config the game configuration
-     */
     public Controller(Grid grid, Config config) {
         this.grid = grid;
         this.config = config;
     }
 
-    /**
-     * Starts the game loop.
-     */
     public void start() {
         Application.run(config.bgColor(), context -> {
-            View view = new View(config);
+            var view = new View(config);
             try {
                 gameLoop(context, view, grid);
             } catch (InterruptedException | IOException e) {
@@ -48,13 +37,12 @@ public class Controller {
         });
     }
 
-    /**
-     * Checks if the game is won.
-     *
-     * @return true if the game is won, false otherwise
-     */
     public boolean gameWin() {
         return win;
+    }
+
+    public boolean isReturnToMenu() {
+        return returnToMenu;
     }
 
     private void gameLoop(ApplicationContext context, View view, Grid grid) throws InterruptedException, IOException {
@@ -97,7 +85,11 @@ public class Controller {
             case DOWN -> grid.moveYou(Direction.DOWN);
             case LEFT -> grid.moveYou(Direction.LEFT);
             case RIGHT -> grid.moveYou(Direction.RIGHT);
-            case ESCAPE, Q -> playing = false;
+            case ESCAPE -> playing = false;
+            case M -> {
+                playing = false;
+                returnToMenu = true;
+            }
             case SPACE -> grid.undoMove();
             default -> {
                 return false;

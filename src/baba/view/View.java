@@ -1,6 +1,7 @@
 package baba.view;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
@@ -10,45 +11,24 @@ import baba.config.Config;
 import baba.grid.Grid;
 import baba.grid.Item;
 
-/**
- * Represents the view of the game.
- */
 public record View(Config config, int tileSize, int marginLeft, int marginTop) {
 
-    /**
-     * Constructs a view with specified configuration and view parameters.
-     *
-     * @param config     The game configuration.
-     * @param tileSize   The size of each tile.
-     * @param marginLeft The left margin.
-     * @param marginTop  The top margin.
-     * @throws NullPointerException     if the configuration is null.
-     * @throws IllegalArgumentException if tileSize, marginLeft, or marginTop is negative.
-     */
     public View {
         Objects.requireNonNull(config);
         if (tileSize < 0 || marginLeft < 0 || marginTop < 0) {
             throw new IllegalArgumentException("Negative view value");
         }
-        tileSize = Math.min(config.width() / config.columns(), config.height() / config.rows());
+        var helpMargin = 60;
+        var availableHeight = config.height() - helpMargin;
+        tileSize = Math.min(config.width() / config.columns(), availableHeight / config.rows());
         marginLeft = (config.width() - (config.columns() * tileSize)) / 2;
-        marginTop = (config.height() - (config.rows() * tileSize)) / 2;
+        marginTop = (availableHeight - (config.rows() * tileSize)) / 2;
     }
 
-    /**
-     * Constructs a view with specified configuration and default view parameters.
-     *
-     * @param config The game configuration.
-     */
     public View(Config config) {
         this(config, 0, 0, 0);
     }
 
-    /**
-     * Clears the grid with a specified background color.
-     *
-     * @param graphics The graphics object.
-     */
     public void clearGrid(Graphics2D graphics) {
         graphics.setColor(Color.BLACK);
         graphics.fillRect(marginLeft, marginTop, config.columns() * tileSize, config.rows() * tileSize);
@@ -71,14 +51,20 @@ public record View(Config config, int tileSize, int marginLeft, int marginTop) {
         }
     }
 
-    /**
-     * Draws the grid with items on the graphics.
-     *
-     * @param graphics The graphics object.
-     * @param grid     The grid to draw.
-     */
+    private void drawHelpMenu(Graphics2D graphics) {
+        var helpText = "ARROWS: Move | SPACE: Undo | M: Menu | ESC: Quit";
+        graphics.setColor(Color.LIGHT_GRAY);
+        var font = new Font("Monospaced", Font.BOLD, 18);
+        graphics.setFont(font);
+        var metrics = graphics.getFontMetrics(font);
+        var x = (config.width() - metrics.stringWidth(helpText)) / 2;
+        var y = config.height() - 20;
+        graphics.drawString(helpText, x, y);
+    }
+
     public void drawGrid(Graphics2D graphics, Grid grid) {
         clearGrid(graphics);
         grid.itemsByTile().values().forEach(list -> drawItemList(graphics, list));
+        drawHelpMenu(graphics);
     }
 }
