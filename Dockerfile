@@ -1,17 +1,16 @@
-FROM eclipse-temurin:23-jre-alpine
+FROM eclipse-temurin:23-jre-jammy
 
-RUN apk add --no-cache \
-    xvfb x11vnc bash python3 \
-    libx11 libxext libxrender libxrandr libxtst libxi \
-    fontconfig ttf-dejavu wget
-
-RUN wget https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz && \
-    tar -xzf v1.4.0.tar.gz && \
-    mv noVNC-1.4.0 /novnc && \
-    wget https://github.com/novnc/websockify/archive/refs/tags/v0.11.0.tar.gz && \
-    tar -xzf v0.11.0.tar.gz && \
-    mv websockify-0.11.0 /novnc/utils/websockify && \
-    rm *.tar.gz
+RUN apt-get update && apt-get install -y \
+    xvfb \
+    x11vnc \
+    novnc \
+    websockify \
+    libxext6 \
+    libxrender1 \
+    libxtst6 \
+    libxi6 \
+    fonts-dejavu \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -26,6 +25,6 @@ CMD rm -f /tmp/.X99-lock && \
     Xvfb :99 -screen 0 800x600x24 & \
     sleep 2 && \
     x11vnc -display :99 -nopw -forever -shared & \
-    /novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 & \
+    websockify --web=/usr/share/novnc/ 6080 localhost:5900 & \
     sleep 2 && \
     java -jar /app/baba.jar
