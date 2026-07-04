@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Baba Is You - Online Demo</title>
@@ -11,6 +12,7 @@
             background-color: #111;
             color: #fff;
         }
+
         #game-container {
             width: 800px;
             height: 600px;
@@ -20,20 +22,22 @@
         }
     </style>
 </head>
+
 <body>
     <h2>Play Baba Is You Demo</h2>
-    
+
     <div id="game-container"></div>
 
     <script>
-        window.onload = async function() {
+        window.onload = async function () {
             try {
-                await cheerpj.init();
-                await cheerpj.runJar("/Baba-is-you/baba.jar");
+                await cheerpjInit();
+                await cheerpjRunJar("/app/baba.jar");
             } catch (error) {
                 console.error("Failed to initialize CheerpJ runtime:", error);
             }
         };
     </script>
 </body>
+
 </html>
