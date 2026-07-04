@@ -1,9 +1,9 @@
-FROM eclipse-temurin:23
+FROM eclipse-temurin:23-jdk
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
     x11vnc \
-    fluxbox \
+    matchbox-window-manager \
     wget \
     tar \
     python3 \
@@ -13,32 +13,36 @@ RUN apt-get update && apt-get install -y \
     libxtst6 \
     libxi6 \
     fonts-dejavu \
+    ant \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz && \
+RUN wget -q https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz && \
     tar -xzf v1.4.0.tar.gz && \
     mv noVNC-1.4.0 /novnc && \
     ln -s /novnc/vnc.html /novnc/index.html && \
-    wget https://github.com/novnc/websockify/archive/refs/tags/v0.11.0.tar.gz && \
+    wget -q https://github.com/novnc/websockify/archive/refs/tags/v0.11.0.tar.gz && \
     tar -xzf v0.11.0.tar.gz && \
     mv websockify-0.11.0 /novnc/utils/websockify && \
     rm *.tar.gz
 
 WORKDIR /app
 
-COPY baba.jar /app/baba.jar
-COPY lib/ /app/lib/
-COPY src/ /app/src/
+# Copy the entire repository into the container
+COPY . /app/
+
+# Compile the source code using Ant (matches 'call ant compile')
+RUN ant compile
 
 EXPOSE 6080
 
 ENV DISPLAY=:99
 
+# Launch the game using the Linux classpath format (:)
 CMD rm -f /tmp/.X99-lock && \
     Xvfb :99 -screen 0 800x600x24 & \
     sleep 2 && \
-    fluxbox -display :99 & \
-    x11vnc -display :99 -nopw -forever -shared & \
-    /novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 & \
+    matchbox-window-manager -display :99 & \
+    x11vnc -display :99 -nopw -forever -shared -quiet & \
+    /novnc/utils/novnc_proxy --vnc localhost:5900 --listen ${PORT:-6080} & \
     sleep 2 && \
-    java -jar /app/baba.jar
+    java -cp "classes:lib/*" baba.engine.Main
