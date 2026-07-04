@@ -45,8 +45,8 @@ EXPOSE 6080
 ENV DISPLAY=:99
 
 CMD rm -f /tmp/.X99-lock && \
-    Xvfb :99 -screen 0 800x600x16 -nolisten tcp -dpms -s 0 & \
-    sleep 2 && \
+    Xvfb :99 -screen 0 800x600x16 -nolisten tcp & \
+    sleep 5 && \
     matchbox-window-manager -display :99 & \
     x11vnc -display :99 -nopw -forever -shared -quiet -defer 10 -ncache 10 & \
     /novnc/utils/novnc_proxy --vnc localhost:5900 --listen ${PORT:-6080} & \
