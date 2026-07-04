@@ -11,9 +11,7 @@ RUN ant compile
 FROM eclipse-temurin:23-jre
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    xvfb \
-    x11vnc \
-    matchbox-window-manager \
+    tigervnc-standalone-server \
     wget \
     tar \
     python3 \
@@ -23,7 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxtst6 \
     libxi6 \
     fonts-dejavu \
-    dbus-x11 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz && \
@@ -45,8 +42,11 @@ EXPOSE 6080
 
 ENV DISPLAY=:99
 
-CMD xvfb-run -n 99 -s "-screen 0 800x600x16 -ac -nolisten tcp" \
-    bash -c "matchbox-window-manager & \
-    x11vnc -display :99 -nopw -forever -shared -quiet -defer 10 -ncache 10 & \
-    /novnc/utils/novnc_proxy --vnc localhost:5900 --listen \${PORT:-6080} & \
-    exec java -Xmx256m -cp 'classes:lib/*' baba.engine.Main"
+CMD rm -rf /tmp/.X11-unix && \
+    mkdir -p /tmp/.X11-unix && \
+    chmod 1777 /tmp/.X11-unix && \
+    Xvnc :99 -SecurityTypes None -geometry 800x600 -depth 16 & \
+    sleep 2 && \
+    /novnc/utils/novnc_proxy --vnc localhost:5900 --listen ${PORT:-6080} & \
+    sleep 2 && \
+    java -Xmx256m -cp "classes:lib/*" baba.engine.Main
