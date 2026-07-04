@@ -9,11 +9,12 @@ COPY lib/ /app/lib/
 
 EXPOSE 6080
 
+ENV DISPLAY=:99
+
 CMD rm -f /tmp/.X99-lock && \
     Xvfb :99 -screen 0 800x600x16 & \
-    export DISPLAY=:99 && \
-    sleep 3 && \
+    sleep 2 && \
     x11vnc -display :99 -nopw -forever -shared & \
-    /usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 & \
+    /usr/bin/novnc_proxy --vnc localhost:5900 --listen 6080 & \
     sleep 2 && \
     java -jar /app/baba.jar
