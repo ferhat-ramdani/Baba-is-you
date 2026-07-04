@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
 RUN wget https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz && \
     tar -xzf v1.4.0.tar.gz && \
     mv noVNC-1.4.0 /novnc && \
+    ln -s /novnc/vnc.html /novnc/index.html && \
     wget https://github.com/novnc/websockify/archive/refs/tags/v0.11.0.tar.gz && \
     tar -xzf v0.11.0.tar.gz && \
     mv websockify-0.11.0 /novnc/utils/websockify && \
