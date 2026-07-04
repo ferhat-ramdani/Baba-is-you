@@ -1,6 +1,6 @@
-FROM alpine:latest
+FROM eclipse-temurin:23-jre-alpine
 
-RUN apk add --no-cache openjdk23-jre xvfb x11vnc novnc bash
+RUN apk add --no-cache xvfb x11vnc novnc bash
 
 WORKDIR /app
 
