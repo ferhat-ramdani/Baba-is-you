@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxtst6 \
     libxi6 \
     fonts-dejavu \
+    dbus-x11 \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz && \
@@ -44,9 +45,11 @@ EXPOSE 6080
 
 ENV DISPLAY=:99
 
-CMD rm -f /tmp/.X99-lock && \
+CMD mkdir -p /tmp/.X11-unix && \
+    chmod 1777 /tmp/.X11-unix && \
+    rm -f /tmp/.X99-lock && \
     Xvfb :99 -screen 0 800x600x16 -nolisten tcp & \
-    sleep 5 && \
+    sleep 3 && \
     matchbox-window-manager -display :99 & \
     x11vnc -display :99 -nopw -forever -shared -quiet -defer 10 -ncache 10 & \
     /novnc/utils/novnc_proxy --vnc localhost:5900 --listen ${PORT:-6080} & \
