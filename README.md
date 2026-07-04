@@ -1,8 +1,9 @@
 <div align="center">
   
-# Baba Is You — Java Edition
+# Baba Is You
 
-<img src="src/images/blocks/BABA.gif" alt="Baba" width="40"/> &nbsp;&nbsp; <img src="src/images/texts/operators/IS.gif" alt="Is" width="40"/> &nbsp;&nbsp; <img src="src/images/texts/properties/YOU.gif" alt="You" width="40"/>
+<img width="800" height="450" alt="babaisyou" src="https://github.com/user-attachments/assets/1d8a3720-89ba-4fd6-88d8-00f717fed305" />
+
 
 **A rule-bending, grid-based puzzle game where you control the laws of physics.**
 
