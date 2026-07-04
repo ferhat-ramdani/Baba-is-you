@@ -6,4 +6,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "Launching game..."
-java -cp "classes:lib/*" baba.engine.Main
+java -cp "classes:lib/*" baba.engine.Main "$@"

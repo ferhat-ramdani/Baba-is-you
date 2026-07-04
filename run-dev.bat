@@ -6,4 +6,4 @@ if %errorlevel% neq 0 (
     exit /b %errorlevel%
 )
 echo Launching game...
-java -cp "classes;lib/*" baba.engine.Main
+java -cp "classes;lib/*" baba.engine.Main %*

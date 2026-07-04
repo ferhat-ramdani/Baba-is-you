@@ -1,4 +1,14 @@
-FROM eclipse-temurin:23-jdk
+FROM eclipse-temurin:23-jdk AS builder
+
+RUN apt-get update && apt-get install -y ant
+
+WORKDIR /app
+
+COPY . .
+
+RUN ant compile
+
+FROM eclipse-temurin:23-jre
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
@@ -13,7 +23,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxtst6 \
     libxi6 \
     fonts-dejavu \
-    ant \
     && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz && \
@@ -27,22 +36,19 @@ RUN wget -q https://github.com/novnc/noVNC/archive/refs/tags/v1.4.0.tar.gz && \
 
 WORKDIR /app
 
-# Copy the entire repository into the container
-COPY . /app/
-
-# Compile the source code using Ant (matches 'call ant compile')
-RUN ant compile
+COPY --from=builder /app/classes /app/classes
+COPY --from=builder /app/lib /app/lib
+COPY --from=builder /app/src /app/src
 
 EXPOSE 6080
 
 ENV DISPLAY=:99
 
-# Launch the game using the Linux classpath format (:)
 CMD rm -f /tmp/.X99-lock && \
-    Xvfb :99 -screen 0 800x600x24 & \
+    Xvfb :99 -screen 0 800x600x16 -nolisten tcp -dpms -s 0 & \
     sleep 2 && \
     matchbox-window-manager -display :99 & \
-    x11vnc -display :99 -nopw -forever -shared -quiet & \
+    x11vnc -display :99 -nopw -forever -shared -quiet -defer 10 -ncache 10 & \
     /novnc/utils/novnc_proxy --vnc localhost:5900 --listen ${PORT:-6080} & \
     sleep 2 && \
-    java -cp "classes:lib/*" baba.engine.Main
+    java -Xmx256m -cp "classes:lib/*" baba.engine.Main
