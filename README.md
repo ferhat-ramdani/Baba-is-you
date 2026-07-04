@@ -30,6 +30,8 @@ Comprehensive manuals for both end-users and developers are provided in the `doc
 
 To build and run the project, open a terminal in the root directory of this repository and execute the following commands:
 
+#### Production (Executable JAR)
+
 1. Compile the source code and build the executable JAR file:
    ```cmd
    ant jar
@@ -39,6 +41,22 @@ To build and run the project, open a terminal in the root directory of this repo
    ```cmd
    java -jar baba.jar
    ```
+
+#### Development & Testing
+
+To test changes quickly without packaging the game into a JAR file, use the provided helper scripts:
+
+**On Windows:**
+```cmd
+run-dev.bat
+```
+
+**On macOS/Linux:**
+```bash
+./run-dev.sh
+```
+
+These scripts will automatically compile the source code and launch the game directly from the compiled classes.
 
 *Note: The game must be launched from the root directory of the repository to ensure it can correctly load the `src/images/` and `src/levels/` resource directories.*
 
