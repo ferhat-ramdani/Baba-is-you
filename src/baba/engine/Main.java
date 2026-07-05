@@ -9,7 +9,11 @@ public class Main {
 		// Web mode: java -jar baba.jar --web [port]
 		if (args != null && args.length > 0 && "--web".equals(args[0])) {
 			var port = 8080;
-			if (args.length > 1) {
+			// Render (and most PaaS) set a PORT env var — always prefer it
+			var envPort = System.getenv("PORT");
+			if (envPort != null) {
+				try { port = Integer.parseInt(envPort); } catch (NumberFormatException ignored) {}
+			} else if (args.length > 1) {
 				try { port = Integer.parseInt(args[1]); } catch (NumberFormatException ignored) {}
 			}
 			var server = new WebServer(port);

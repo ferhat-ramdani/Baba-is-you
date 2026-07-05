@@ -19,4 +19,4 @@ COPY --from=builder /app/src /app/src
 
 EXPOSE 8080
 
-CMD ["java", "-Djava.awt.headless=true", "-jar", "baba.jar", "--web", "8080"]
+CMD java -Djava.awt.headless=true -jar baba.jar --web ${PORT:-8080}
