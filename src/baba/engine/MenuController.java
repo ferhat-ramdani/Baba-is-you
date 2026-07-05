@@ -99,72 +99,17 @@ public class MenuController {
     }
 
     private void menuLoop(ApplicationContext context) throws InterruptedException, IOException {
+        var lastRenderTime = 0L;
+        var firstFrame = true;
         while (!exit && selectedLevel == null) {
-            context.renderFrame(graphics -> {
-                var screenInfo = context.getScreenInfo();
-                var width = (int) screenInfo.width();
-                var height = (int) screenInfo.height();
-
-                graphics.setColor(Color.BLACK);
-                graphics.fillRect(0, 0, width, height);
-
-                graphics.setColor(Color.WHITE);
-                var titleFont = new Font("Monospaced", Font.BOLD, 72);
-                graphics.setFont(titleFont);
-                var title = "BABA IS YOU";
-                var metrics = graphics.getFontMetrics(titleFont);
-                var titleY = height / 4;
-                var titleX = (width - metrics.stringWidth(title)) / 2;
-                graphics.drawString(title, titleX, titleY);
-
-                var subFont = new Font("Monospaced", Font.PLAIN, 36);
-                graphics.setFont(subFont);
-                var subtitle = currentState == State.FOLDER_SELECTION ? "Select Level Folder" : "Select Level";
-                metrics = graphics.getFontMetrics(subFont);
-                var subY = titleY + 80;
-                var subX = (width - metrics.stringWidth(subtitle)) / 2;
-                graphics.drawString(subtitle, subX, subY);
-
-                var options = currentState == State.FOLDER_SELECTION ? folders : levels;
-                var rowHeight = 60;
-                var totalOptionsHeight = options.size() * rowHeight;
-                var startY = Math.max(subY + 120, (height - totalOptionsHeight) / 2 + rowHeight);
-
-                for (var i = 0; i < options.size(); i++) {
-                    var option = options.get(i);
-                    if (i == selectedIndex) {
-                        graphics.setColor(Color.PINK);
-                        option = "> " + option + " <";
-                    } else {
-                        graphics.setColor(Color.LIGHT_GRAY);
-                    }
-                    metrics = graphics.getFontMetrics(subFont);
-                    var optX = (width - metrics.stringWidth(option)) / 2;
-                    graphics.drawString(option, optX, startY + i * rowHeight);
-                }
-
-                if (currentState == State.FOLDER_SELECTION && !folders.isEmpty()) {
-                    var selected = folders.get(selectedIndex);
-                    var desc = "";
-                    if (selected.equals("original")) {
-                        desc = "Experience the classic journey: 6 iconic levels from the original puzzle.";
-                    } else if (selected.equals("exclusive")) {
-                        desc = "Venture into the unknown: entirely new puzzles featuring unseen mechanics.";
-                    }
-                    if (!desc.isEmpty()) {
-                        var descFont = new Font("Monospaced", Font.ITALIC, 24);
-                        graphics.setFont(descFont);
-                        graphics.setColor(Color.LIGHT_GRAY);
-                        var descMetrics = graphics.getFontMetrics(descFont);
-                        var descX = (width - descMetrics.stringWidth(desc)) / 2;
-                        var descY = startY + totalOptionsHeight + 80;
-                        graphics.drawString(desc, descX, descY);
-                    }
-                }
-            });
-            var event = context.pollOrWaitEvent(200);
+            var now = System.currentTimeMillis();
+            var waitTime = Math.max(0, 200 - (now - lastRenderTime));
+            var event = context.pollOrWaitEvent(firstFrame ? 0 : waitTime);
+            
+            var handled = false;
             if (event instanceof KeyboardEvent keyboardEvent) {
                 if (keyboardEvent.action() == KeyboardEvent.Action.KEY_PRESSED) {
+                    handled = true;
                     switch (keyboardEvent.key()) {
                         case UP -> {
                             selectedIndex--;
@@ -206,6 +151,74 @@ public class MenuController {
                         default -> {}
                     }
                 }
+            }
+            
+            now = System.currentTimeMillis();
+            if (firstFrame || handled || now - lastRenderTime >= 200) {
+                firstFrame = false;
+                lastRenderTime = now;
+                context.renderFrame(graphics -> {
+                    var screenInfo = context.getScreenInfo();
+                    var width = (int) screenInfo.width();
+                    var height = (int) screenInfo.height();
+
+                    graphics.setColor(Color.BLACK);
+                    graphics.fillRect(0, 0, width, height);
+
+                    graphics.setColor(Color.WHITE);
+                    var titleFont = new Font("Monospaced", Font.BOLD, 72);
+                    graphics.setFont(titleFont);
+                    var title = "BABA IS YOU";
+                    var metrics = graphics.getFontMetrics(titleFont);
+                    var titleY = height / 4;
+                    var titleX = (width - metrics.stringWidth(title)) / 2;
+                    graphics.drawString(title, titleX, titleY);
+
+                    var subFont = new Font("Monospaced", Font.PLAIN, 36);
+                    graphics.setFont(subFont);
+                    var subtitle = currentState == State.FOLDER_SELECTION ? "Select Level Folder" : "Select Level";
+                    metrics = graphics.getFontMetrics(subFont);
+                    var subY = titleY + 80;
+                    var subX = (width - metrics.stringWidth(subtitle)) / 2;
+                    graphics.drawString(subtitle, subX, subY);
+
+                    var options = currentState == State.FOLDER_SELECTION ? folders : levels;
+                    var rowHeight = 60;
+                    var totalOptionsHeight = options.size() * rowHeight;
+                    var startY = Math.max(subY + 120, (height - totalOptionsHeight) / 2 + rowHeight);
+
+                    for (var i = 0; i < options.size(); i++) {
+                        var option = options.get(i);
+                        if (i == selectedIndex) {
+                            graphics.setColor(Color.PINK);
+                            option = "> " + option + " <";
+                        } else {
+                            graphics.setColor(Color.LIGHT_GRAY);
+                        }
+                        metrics = graphics.getFontMetrics(subFont);
+                        var optX = (width - metrics.stringWidth(option)) / 2;
+                        graphics.drawString(option, optX, startY + i * rowHeight);
+                    }
+
+                    if (currentState == State.FOLDER_SELECTION && !folders.isEmpty()) {
+                        var selected = folders.get(selectedIndex);
+                        var desc = "";
+                        if (selected.equals("original")) {
+                            desc = "Experience the classic journey: 6 iconic levels from the original puzzle.";
+                        } else if (selected.equals("exclusive")) {
+                            desc = "Venture into the unknown: entirely new puzzles featuring unseen mechanics.";
+                        }
+                        if (!desc.isEmpty()) {
+                            var descFont = new Font("Monospaced", Font.ITALIC, 24);
+                            graphics.setFont(descFont);
+                            graphics.setColor(Color.LIGHT_GRAY);
+                            var descMetrics = graphics.getFontMetrics(descFont);
+                            var descX = (width - descMetrics.stringWidth(desc)) / 2;
+                            var descY = startY + totalOptionsHeight + 80;
+                            graphics.drawString(desc, descX, descY);
+                        }
+                    }
+                });
             }
         }
         context.dispose();

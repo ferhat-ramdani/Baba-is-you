@@ -37,6 +37,28 @@ public record GameSetter() {
   }
 
   /**
+   * Sets up the game environment for web (headless) mode.
+   * Does NOT open any Swing/AWT window — uses fixed pixel dimensions.
+   *
+   * @param args  the command-line arguments
+   * @param width  screen width in pixels
+   * @param height screen height in pixels
+   * @throws IOException if an I/O error occurs
+   */
+  public static void WebGameSetUp(String[] args, int width, int height) throws IOException {
+    var userDir = System.getProperty("user.dir");
+    var defaultPath = Path.of(userDir, "src", "levels", "default", "1.txt");
+    var bgColor = Color.getHSBColor(0.65F, 0.4F, 0.10F);
+    config = new Config(width, height, defaultPath, 0, 0, bgColor, new EmptyRule());
+    var commandParser = new CommandParser(args, config);
+    if (!commandParser.parse()) {
+      return;
+    }
+    config = commandParser.config();
+    levelSetUp();
+  }
+
+  /**
    * Sets up the level based on the current configuration.
    *
    * @throws IOException if an I/O error occurs

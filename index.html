@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Baba Is You - WebAssembly</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: sans-serif;
+        }
+        #cheerpj-display {
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+        #loading {
+            position: absolute;
+            font-size: 24px;
+        }
+    </style>
+    <!-- Load the CheerpJ runtime -->
+    <script src="https://cjrtnc.leaningtech.com/3.0/cj3loader.js"></script>
+</head>
+<body>
+    <div id="loading">Loading Game Engine...</div>
+    <script type="module">
+        (async function () {
+            // Initialize CheerpJ 3
+            await cheerpjInit();
+            
+            // Hide loading text once initialized
+            document.getElementById('loading').style.display = 'none';
+
+            // Create a display for the graphical app
+            // We'll use 800x600 as a default
+            cheerpjCreateDisplay(800, 600, document.body);
+            
+            // Run the JAR
+            await cheerpjRunJar("/app/baba.jar");
+        })();
+    </script>
+</body>
+</html>

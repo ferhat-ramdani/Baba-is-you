@@ -61,6 +61,24 @@ These scripts will automatically compile the source code and launch the game dir
 
 *Note: The game must be launched from the root directory of the repository to ensure it can correctly load the `src/images/` and `src/levels/` resource directories.*
 
+#### Web / Production Deployment (Docker)
+
+The game can be deployed as a web application using Docker. No external dependencies (no Webswing, no VNC) are required — the game runs as a lightweight Java HTTP server and renders entirely in the browser via HTML5 Canvas.
+
+**Requirements:** Docker
+
+```bash
+# Build the image
+docker build -t baba-is-you .
+
+# Run on port 8080
+docker run -d -p 8080:8080 --name baba-is-you baba-is-you
+```
+
+Then open **http://localhost:8080** in your browser.
+
+The game state is served as a tiny JSON payload (~1KB per move). Sprites are cached by the browser after the first load. Performance is identical to running it natively.
+
 ## Key Features
 
 * **Dynamic Rule System:** Push text blocks together to rewrite the physics and logic of the game during runtime.

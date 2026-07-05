@@ -2,3 +2,12 @@
 classes
 out
 .agent
+
+# Build artifacts
+baba.jar
+docs/doc/
+
+# Webswing — no longer used (replaced by lightweight HTTP+Canvas solution)
+.webswing_temp/
+lib/webswing.zip
+webswing.config

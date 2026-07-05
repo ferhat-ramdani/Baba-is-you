@@ -46,21 +46,36 @@ public class Controller {
     }
 
     private void gameLoop(ApplicationContext context, View view, Grid grid) throws InterruptedException, IOException {
+        long lastRenderTime = 0;
+        boolean firstFrame = true;
         while (playing && !win) {
-            grid.searchRule();
-            grid.saveMove();
-            context.renderFrame(graphics -> {
-                view.drawGrid(graphics, grid);
-            });
-            var event = context.pollOrWaitEvent(200);
-            if (event != null && handleEvent(context, event) && playing) {
-                grid.checkRule(PropertyWord.SINK);
-                grid.checkRule(PropertyWord.YOU, PropertyWord.DEFEAT);
-                grid.checkRule(PropertyWord.MELT, PropertyWord.HOT);
-                grid.checkRule(PropertyWord.STICK);
-                if (grid.checkRule(PropertyWord.YOU, PropertyWord.WIN)) {
-                    win = true;
+            long now = System.currentTimeMillis();
+            long waitTime = Math.max(0, 200 - (now - lastRenderTime));
+            var event = context.pollOrWaitEvent(firstFrame ? 0 : waitTime);
+            
+            boolean handled = false;
+            if (event != null) {
+                handled = handleEvent(context, event);
+                if (handled && playing) {
+                    grid.checkRule(PropertyWord.SINK);
+                    grid.checkRule(PropertyWord.YOU, PropertyWord.DEFEAT);
+                    grid.checkRule(PropertyWord.MELT, PropertyWord.HOT);
+                    grid.checkRule(PropertyWord.STICK);
+                    if (grid.checkRule(PropertyWord.YOU, PropertyWord.WIN)) {
+                        win = true;
+                    }
                 }
+            }
+            
+            now = System.currentTimeMillis();
+            if (firstFrame || handled || now - lastRenderTime >= 200) {
+                firstFrame = false;
+                lastRenderTime = now;
+                grid.searchRule();
+                grid.saveMove();
+                context.renderFrame(graphics -> {
+                    view.drawGrid(graphics, grid);
+                });
             }
         }
         context.dispose();

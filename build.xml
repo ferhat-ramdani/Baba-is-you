@@ -21,6 +21,7 @@
 
   <target name="jar" depends="compile">
     <jar destfile="${basedir}/${jar.name}" basedir="${classes.dir}">
+      <fileset dir="${src.dir}" includes="baba/web/index.html"/>
       <manifest>
         <attribute name="Main-Class" value="${main.class}" />
         <attribute name="Class-Path" value="lib/zen-6.0.jar" />

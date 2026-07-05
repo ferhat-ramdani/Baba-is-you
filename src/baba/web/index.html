@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baba Is You</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d0d1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    color: #fff;
+    user-select: none;
+  }
+  #canvas {
+    image-rendering: pixelated;
+    display: block;
+  }
+  #help {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #aaa;
+    letter-spacing: 1px;
+  }
+  #status {
+    position: fixed;
+    top: 8px;
+    right: 12px;
+    font-size: 11px;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="help">ARROWS: Move &nbsp;|&nbsp; SPACE: Undo &nbsp;|&nbsp; M: Menu &nbsp;|&nbsp; ESC: Quit</div>
+<div id="status">●</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const statusEl = document.getElementById('status');
+
+// --- Sprite cache ---
+const spriteCache = {};
+function getSprite(path) {
+  if (!spriteCache[path]) {
+    const img = new Image();
+    img.src = '/sprites/' + path;
+    spriteCache[path] = img;
+  }
+  return spriteCache[path];
+}
+
+// --- Pre-warm all known sprites ---
+const SPRITES = [
+  'blocks/BABA.gif','blocks/FLAG.gif','blocks/FLOWER.gif','blocks/GLUE.gif',
+  'blocks/GRASS.gif','blocks/LAVA.gif','blocks/ROCK.gif','blocks/SKULL.gif',
+  'blocks/TILE.gif','blocks/WALL.gif','blocks/WATER.gif',
+  'texts/blocks/BABA.gif','texts/blocks/FLAG.gif','texts/blocks/FLOWER.gif',
+  'texts/blocks/GLUE.gif','texts/blocks/GRASS.gif','texts/blocks/LAVA.gif',
+  'texts/blocks/ROCK.gif','texts/blocks/SKULL.gif','texts/blocks/TILE.gif',
+  'texts/blocks/WALL.gif','texts/blocks/WATER.gif',
+  'texts/operators/IS.gif',
+  'texts/properties/WIN.gif','texts/properties/YOU.gif','texts/properties/PUSH.gif',
+  'texts/properties/STOP.gif','texts/properties/SINK.gif','texts/properties/DEFEAT.gif',
+  'texts/properties/HOT.gif','texts/properties/MELT.gif','texts/properties/STICK.gif',
+];
+SPRITES.forEach(getSprite);
+
+// --- State ---
+let state = null;
+let lastVersion = -1;
+let inputLocked = false;
+
+// --- Canvas sizing ---
+function resizeCanvas() {
+  const maxW = window.innerWidth - 20;
+  const maxH = window.innerHeight - 60;
+  canvas.style.maxWidth = maxW + 'px';
+  canvas.style.maxHeight = maxH + 'px';
+  canvas.width = maxW;
+  canvas.height = maxH;
+  if (state) render(state);
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// --- Fetch state polling (only poll when idle, not on keypresses) ---
+let pollTimer = null;
+function schedulePoll(delay = 500) {
+  clearTimeout(pollTimer);
+  pollTimer = setTimeout(fetchState, delay);
+}
+
+async function fetchState() {
+  try {
+    const res = await fetch('/api/state');
+    const data = await res.json();
+    if (data.version !== lastVersion) {
+      lastVersion = data.version;
+      state = data;
+      render(state);
+    }
+    schedulePoll(1000); // slow idle poll
+  } catch (e) {
+    statusEl.textContent = '● disconnected';
+    schedulePoll(2000);
+  }
+}
+
+// --- Send key to server, get back new state immediately ---
+async function sendKey(key) {
+  if (inputLocked) return;
+  inputLocked = true;
+  statusEl.textContent = '●';
+  try {
+    const res = await fetch('/api/move', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: key
+    });
+    const data = await res.json();
+    lastVersion = data.version;
+    state = data;
+    render(state);
+  } catch (e) {
+    statusEl.textContent = '● error';
+  } finally {
+    inputLocked = false;
+  }
+}
+
+// --- Keyboard handling ---
+document.addEventListener('keydown', e => {
+  const map = {
+    ArrowUp: 'UP', ArrowDown: 'DOWN', ArrowLeft: 'LEFT', ArrowRight: 'RIGHT',
+    ' ': 'SPACE', Escape: 'ESCAPE', m: 'M', M: 'M',
+    Enter: 'ENTER',
+  };
+  const key = map[e.key];
+  if (key) {
+    e.preventDefault();
+    sendKey(key);
+  }
+});
+
+// --- Rendering ---
+const BG_MENU = '#000000';
+const BG_GAME = '#1a1a2e';
+const PINK = '#ffaaaa';
+const LIGHT_GRAY = '#bbbbbb';
+const WHITE = '#ffffff';
+
+function render(s) {
+  if (!s) return;
+  if (s.phase === 'menu') renderMenu(s);
+  else if (s.phase === 'game') renderGame(s);
+  else if (s.phase === 'win') renderOverlay('YOU WIN!', '#ffe066', 'ENTER: Next Level', 'ESC: Return to Menu');
+  else if (s.phase === 'over') renderOverlay('GAME OVER', '#ff6666', 'ENTER or ESC: Return to Menu');
+}
+
+function renderMenu(s) {
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = BG_MENU;
+  ctx.fillRect(0, 0, W, H);
+
+  // Title
+  ctx.fillStyle = WHITE;
+  ctx.font = `bold ${Math.floor(H * 0.1)}px 'Courier New', monospace`;
+  ctx.textAlign = 'center';
+  ctx.fillText('BABA IS YOU', W / 2, H * 0.22);
+
+  // Subtitle
+  const subtitle = s.menuState === 'FOLDER' ? 'Select Level Folder' : 'Select Level';
+  ctx.font = `${Math.floor(H * 0.045)}px 'Courier New', monospace`;
+  ctx.fillStyle = LIGHT_GRAY;
+  ctx.fillText(subtitle, W / 2, H * 0.33);
+
+  // Options
+  const opts = s.menuState === 'FOLDER' ? s.folders : s.levels;
+  const rowH = Math.floor(H * 0.08);
+  const startY = H * 0.44;
+
+  opts.forEach((opt, i) => {
+    const selected = i === s.selectedIndex;
+    ctx.font = `${Math.floor(H * 0.05)}px 'Courier New', monospace`;
+    ctx.fillStyle = selected ? PINK : LIGHT_GRAY;
+    const label = selected ? '> ' + opt + ' <' : opt;
+    ctx.fillText(label, W / 2, startY + i * rowH);
+  });
+
+  // Description
+  const descs = { original: 'Experience the classic journey: 6 iconic levels.', exclusive: 'Entirely new puzzles with unseen mechanics.' };
+  if (s.menuState === 'FOLDER' && s.folders.length > 0) {
+    const sel = s.folders[s.selectedIndex];
+    const desc = descs[sel] || '';
+    if (desc) {
+      ctx.font = `italic ${Math.floor(H * 0.028)}px 'Courier New', monospace`;
+      ctx.fillStyle = '#888';
+      ctx.fillText(desc, W / 2, startY + opts.length * rowH + 40);
+    }
+  }
+}
+
+function renderGame(s) {
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = BG_GAME;
+  ctx.fillRect(0, 0, W, H);
+
+  if (!s.items || !s.rows || !s.cols) return;
+
+  const tileSize = Math.min(Math.floor(W / s.cols), Math.floor(H / s.rows));
+  const marginLeft = Math.floor((W - s.cols * tileSize) / 2);
+  const marginTop = Math.floor((H - s.rows * tileSize) / 2);
+
+  // Grid background
+  ctx.fillStyle = '#0d0d1a';
+  ctx.fillRect(marginLeft, marginTop, s.cols * tileSize, s.rows * tileSize);
+
+  // Draw items
+  for (const item of s.items) {
+    const img = getSprite(item.s);
+    if (img.complete && img.naturalWidth > 0) {
+      const x = marginLeft + (item.c - 1) * tileSize;
+      const y = marginTop + (item.r - 1) * tileSize;
+      ctx.drawImage(img, x, y, tileSize, tileSize);
+    } else {
+      // Image not loaded yet — draw colored placeholder
+      img.onload = () => render(state);
+      ctx.fillStyle = '#333';
+      ctx.fillRect(marginLeft + (item.c - 1) * tileSize, marginTop + (item.r - 1) * tileSize, tileSize - 1, tileSize - 1);
+    }
+  }
+}
+
+function renderOverlay(title, color, line1, line2) {
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = 'rgba(0,0,0,0.85)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+  ctx.fillStyle = color;
+  ctx.font = `bold ${Math.floor(H * 0.12)}px 'Courier New', monospace`;
+  ctx.fillText(title, W / 2, H * 0.42);
+  ctx.fillStyle = '#aaa';
+  ctx.font = `${Math.floor(H * 0.035)}px 'Courier New', monospace`;
+  ctx.fillText(line1, W / 2, H * 0.56);
+  if (line2) ctx.fillText(line2, W / 2, H * 0.62);
+}
+
+// --- Animation loop (drives GIF animation by continuously redrawing) ---
+let animRunning = false;
+function startAnimLoop() {
+  if (animRunning) return;
+  animRunning = true;
+  function loop() {
+    if (state && state.phase === 'game') {
+      renderGame(state);
+    }
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+
+// --- Boot ---
+fetchState();
+startAnimLoop();
+</script>
+</body>
+</html>

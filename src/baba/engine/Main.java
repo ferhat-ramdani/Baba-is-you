@@ -2,9 +2,27 @@ package baba.engine;
 
 import java.io.IOException;
 import baba.config.GameSetter;
+import baba.web.WebServer;
 
 public class Main {
 	public static void main(String[] args) throws IOException {
+		// Web mode: java -jar baba.jar --web [port]
+		if (args != null && args.length > 0 && "--web".equals(args[0])) {
+			var port = 8080;
+			if (args.length > 1) {
+				try { port = Integer.parseInt(args[1]); } catch (NumberFormatException ignored) {}
+			}
+			var server = new WebServer(port);
+			server.start();
+			// Block forever
+			var lock = new Object();
+			synchronized (lock) {
+				try { lock.wait(); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+			}
+			return;
+		}
+
+		// Normal desktop mode
 		boolean hasLevelArg = false;
 		if (args != null) {
 			for (String arg : args) {
