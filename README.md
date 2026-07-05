@@ -20,6 +20,8 @@ Comprehensive manuals for both end-users and developers are provided in the `doc
 * **User Manual**: See [docs/user.md](docs/user.md) for instructions on how to play the game, a breakdown of property behaviors, and a guide for creating custom levels.
 * **Developer Manual**: See [docs/dev.md](docs/dev.md) for architectural details, the MVC design pattern implementation, and the underlying recursive collision system used in the codebase.
 
+Try the game here : [baba-is-you.onrender.com](https://baba-is-you.onrender.com/)
+
 ## Quick Start
 
 ### Prerequisites
