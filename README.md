@@ -11,7 +11,7 @@
 
 ---
 
-This repository contains a Java-based implementation of the puzzle game Baba Is You. The project faithfully replicates the core mechanics of the original game, where the rules governing the environment are physical text blocks that the player can push and manipulate to alter the game state.
+A Java implementation of Hempuli's *Baba Is You*, where the rules of the level aren't fixed — they're physical text blocks (`BABA`, `IS`, `WALL`, `STOP`...) sitting on the same grid as the player, and pushing them around rewrites the laws of the game live. The interesting part of building this wasn't the puzzle levels, it was the rule engine underneath: every move re-scans the grid for `[Noun] IS [Property/Noun]` patterns and re-derives the entire rule set from scratch, so the game has to stay correct even while its own physics are being edited mid-move.
 
 ## Documentation
 
